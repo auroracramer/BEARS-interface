@@ -2,10 +2,34 @@
 
 import sys
 
+def process_args(opts, args):
+    for o, a in opts:
+        if o in ("-h", "--help"):
+            print __doc__
+            return
+    for arg in args:
+        if arg == "help":
+            print __doc__
+            return
+        if arg == " ":
+            
+    
+def loop():
+    print("Welcome to BEARS!\n")
+    while True:
+        process_args([], split(input('[^-.-^] ')))
 
 def main():
-
-
-
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "h", ["help"])
+    except getopt.error, msg:
+        print(msg)
+        print("for help use --help")
+        sys.exit(2)
+    if len(args) == 0:
+        loop()
+    else:
+        process_arg(opt, args)
+    
 if __name__ == "__main__":
     sys.exit(main())
