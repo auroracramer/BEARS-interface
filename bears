@@ -1,6 +1,9 @@
-#! usr/bin/python3
+#!/usr/bin/python -O
 
-import sys
+import sys, getopt
+from subprocess import call
+
+DAEMONPATH = '/etc/init.d/testdaemonscript.sh'
 
 def process_args(opts, args):
     for o, a in opts:
@@ -12,12 +15,16 @@ def process_args(opts, args):
             print __doc__
             return
         if arg == " ":
-            
-    
+            return
+
+def send_to_daemon(message):
+    call([DAEMONPATH] + message);
+
+
 def loop():
     print("Welcome to BEARS!\n")
     while True:
-        process_args([], split(input('[^-.-^] ')))
+        process_args([], str(input('[^-.-^] ')).split())
 
 def main():
     try:
