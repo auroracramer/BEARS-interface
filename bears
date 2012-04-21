@@ -87,7 +87,7 @@ def authenticate():
 
 def send_to_daemon(message):
     """ Passes along a message to the daemon."""
-    call([DAEMONPATH] + message + [getpass.getuser()]);
+    call([DAEMONPATH] + message + [os.path.abspath('.'),getpass.getuser()]);
 
 
 def loop():
