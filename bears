@@ -1,5 +1,18 @@
 #!/usr/bin/python -O
 
+"""
+BEARS (Berkeley Editing And Revision System) Interface
+
+by Tonight We Dine In Shell!
+    - Jason Cramer
+    - Jian Qiao
+    - Praveen Puvvadi
+    - Ronald Lee
+    - Siyuan He
+
+"""
+
+
 import sys, getopt, os, getpass
 from subprocess import call
 
@@ -29,28 +42,35 @@ addpushall                :: Adds and pushes all of the files in the
 
 
 def process_args(opts, args):
+    """ Process the arguments. Technically, this d`oesn't perform the actions
+        requested by the user, but merely passes them on if valid. """
     for o, a in opts:
         if o in ("-h", "--help"):
             print(helpdoc)
             return
-    # We assume that the first argument describes the process to be done
-    for arg in args:
-        if arg == "help":
-            print(helpdoc)
-            return
-        if arg == "exit" or arg == "goodbye" or arg == "quit":
-            print("Goodbye!")
+    # We assume that the first argument describes the process to be done.
+    # Since the daemon will be doing all of the processing, all we need
+    # to do is pass along the message.
+    arg = args[0]
+    if arg == "help":
+        print(helpdoc)
+        return
+    if arg in ["exit", "goodbye", "quit"]:
+        print("Goodbye!")
+        sys.exit()
+    if arg in ["share", "add", "push", "addpush", "addpushall", "adduser", "retrieve"]:
+        try:
+            send_to_daemon(args)
+        except OSError:
+            print("Uh oh, something went terribly wrong. Jumping ship!")
             sys.exit()
-    	if arg == "example":
-	    try:
-                send_to_daemon(args)
-            except OSError:
-                print("Uh oh, something went terribly wrong. Jumping ship!")
-                sys.exit()
-        else:
-            print("We didn't recognize \"" + arg + "\". Why don't you try typing \"help\" if you're having trouble?")
+    else:
+        print("We didn't recognize \"" + arg + "\". Why don't you try typing \"help\" if you're having trouble?")
+
 
 def authenticate():
+    """ Prompts the user with a password request to ensure that the user is
+        who he says he is, so he can't wreak havoc. """
     command = "/usr/bin/su " + getpass.getuser() + " -c \"exit\" 2>/dev/null"
     print("Please enter your password -- we want to make sure you're you!\n")
     for _ in range(3):
@@ -64,10 +84,12 @@ def authenticate():
 
 
 def send_to_daemon(message):
+    """ Passes along a message to the daemon."""
     call([DAEMONPATH] + message);
 
 
 def loop():
+    """ The REPL loop for the interface. """
     print("Welcome to BEARS!\n")
     while True:
         try:
@@ -84,6 +106,7 @@ def main():
         print("for help use --help")
         sys.exit(2)
     if len(args) == 0:
+        authenticate()
         loop()
     else:
         if args[0] != "help":

@@ -10,19 +10,46 @@
 # Description:       Enable service provided by daemon.
 ### END INIT INFO
 
-
+pname="bearinit"
+daemonpath="/etc/bears/bearinitc"
+# This strips the program call from the arguments to form the message
+message=("${$[@]:1:${#$[@]}}")
 
 case "$1" in
 'start')
-/home/shared/testdaemon start
+"$daemonpath" start
+;;
+
+'adduser')
+"$daemonpath" "${B[@]}"
+;;
+
+'retrieve')
+"$daemonpath" "${B[@]}"
+;;
+
+'add')
+"$daemonpath" "${B[@]}"
+;;
+
+'push')
+"$daemonpath" "${B[@]}"
+;;
+
+'addpush')
+"$daemonpath" "${B[@]}"
+;;
+
+'addpushall')
+"$daemonpath" "${B[@]}"
 ;;
 
 'stop')
-pkill testdaemon
+pkill "$pname"
 ;;
 
 'restart')
-pkill -HUP testdaemon
+pkill -HUP "$pname"
 ;;
 
 esac
