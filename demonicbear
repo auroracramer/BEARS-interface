@@ -22,6 +22,8 @@ if __name__ == "__main__":
                         daemon.stop()
                 elif 'restart' == sys.argv[1]:
                         daemon.restart()
+                elif 'share' == sys.argv[1]:
+                        
                 elif 'adduser' == sys.argv[1]:
                         
                 elif 'retrieve' == sys.argv[1]:
@@ -30,13 +32,15 @@ if __name__ == "__main__":
                         if(sys.argv[2] == '-m'):
                             filename = sys.argv[3]
                             message = sys.argv[4]
+                            username = sys.argv[5]
                         else:
                             filename = sys.argv[2]
-                            message = sys.argv[3]
-                        message = getpass.getuser() + ": " + message
+                            message = 'added changes to ' + filename
+                            username = sys.arg[3]
+                        message = username + ": " + message
                         os.system('git add ' + filename)
-                        os
-                        
+                        os.system('git commit -m ' + '\'' + message + '\'')
+
                 elif 'push' == sys.argv[1]:
                         os.system('git push -u origin master')
                 elif 'addpush' == sys.argv[1]:
