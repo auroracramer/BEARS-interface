@@ -51,6 +51,8 @@ def process_args(opts, args):
     # We assume that the first argument describes the process to be done.
     # Since the daemon will be doing all of the processing, all we need
     # to do is pass along the message.
+    if len(args) == 0:
+        return
     arg = args[0]
     if arg == "help":
         print(helpdoc)
@@ -60,7 +62,7 @@ def process_args(opts, args):
         sys.exit()
     if arg in ["share", "add", "push", "addpush", "addpushall", "adduser", "retrieve"]:
         try:
-            send_to_daemon(args)
+            send_to_daemon(sys.argv[:1])
         except OSError:
             print("Uh oh, something went terribly wrong. Jumping ship!")
             sys.exit()
@@ -85,7 +87,7 @@ def authenticate():
 
 def send_to_daemon(message):
     """ Passes along a message to the daemon."""
-    call([DAEMONPATH] + message);
+    call([DAEMONPATH] + message + [getpass.getuser()]);
 
 
 def loop():
