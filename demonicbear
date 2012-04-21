@@ -4,9 +4,11 @@ import sys, time, os, getpass
 from daemon import Daemon
 
 
+repo_path = "/etc/bears/repo"
+
 repo_users = dict()
 pending_users = dict()
-repo_groups = dict()
+#Group names are the same as repository names 
 
 class MyDaemon(Daemon):
         def run(self):
@@ -23,6 +25,18 @@ if __name__ == "__main__":
                 elif 'restart' == sys.argv[1]:
                         daemon.restart()
                 elif 'share' == sys.argv[1]:
+                        directory = sys.argv[2]
+                        userpath = sys.argv[3]
+                        name = directory.split('/')[len(directory.split('/')) - 1]
+                        username = sys.argv[4]
+
+                        os.mkdir(repo_path + '/' + name)
+			# Lookup mode stuff for changing permissions
+                        os.system('git clone --bare ' + name + ' ' + name + '.git')
+                        # Make a new group, look up how to do that
+                        repo_users[name] = list()
+                        repo_users[name].append(username)
+                        os.chdir(directory + '/..')
                         
                 elif 'adduser' == sys.argv[1]:
                         
@@ -32,26 +46,32 @@ if __name__ == "__main__":
                         if(sys.argv[2] == '-m'):
                             filename = sys.argv[3]
                             message = sys.argv[4]
-                            username = sys.argv[5]
+                            userpath = sys.argv[5]
+                            username = sys.argv[6]
                         else:
                             filename = sys.argv[2]
                             message = 'added changes to ' + filename
-                            username = sys.arg[3]
+                            userpath = sys.argv[3]
+                            username = sys.arg[4]
                         message = username + ": " + message
+
                         os.system('git add ' + filename)
                         os.system('git commit -m ' + '\'' + message + '\'')
-
+                        # Still need to chmod files
+			##### MAKE SURE ABSOLUTE PATHS ARE ACCOUNTED FOR!
                 elif 'push' == sys.argv[1]:
                         os.system('git push -u origin master')
                 elif 'addpush' == sys.argv[1]:
                         if(sys.argv[2] == '-m'):
                             filename = sys.argv[3]
                             message = sys.argv[4]
-			    username=sys.argv[5]
+                            userpath = sys.argv[5]
+			    username=sys.argv[6]
                         else:
                             filename = sys.argv[2]
                             message = 'added changes '+filename
-			    username=sys.argv[3]
+                            userpath = sys.argv[3]
+			    username=sys.argv[4]
                         message = getpass.getuser() + ": " + message
                         os.system('git add ' + filename)
                         os.system('git commit -m '+'\''+message+'\'')
@@ -61,11 +81,13 @@ if __name__ == "__main__":
 			if(sys.argv[2] == '-m'):
                             filename = sys.argv[3]
                             message = sys.argv[4]
-                            username=sys.argv[5]
+                            userpath = sys.argv[5]
+                            username=sys.argv[6]
                         else:
                             filename = sys.argv[2]
                             message = 'added changes '+filename
-                            username=sys.argv[3]
+                            userpath = sys.argv[3]
+                            username=sys.argv[4]
                         os.system('git add -A')
 			os.system('git commit -m '+'\''+message+'\'')
 			os.system('git push -u origin master')  
