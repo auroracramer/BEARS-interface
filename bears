@@ -1,21 +1,67 @@
 #!/usr/bin/python -O
 
-import sys, getopt
+import sys, getopt, os, getpass
 from subprocess import call
 
 DAEMONPATH = '/etc/init.d/testdaemonscript.sh'
 
+helpdoc = """
+
+share <path to directory> :: Initialize a directory for sharing.
+adduser <username>        :: Add a user to a project. Note that you must be
+                             in the main project folder while you call this.
+retrieve <foldername>     :: If you have been added to a project, confirm 
+                             that you're okay with it. This will make a copy 
+                             of the files in your current directory.
+add -m <filename>         :: Adds a file to the queue of files to be pushed to
+                             the project repository. Adding the -m option will
+                             allow you to add it with a specific message, 
+                             detailing your changes to the file.
+push                      :: Pushes all of the files in the queue to the 
+                             project repository.
+addpush -m <filename>     :: Adds and automatically pushes a file to the
+                             project repository. Adding the -m option will
+                             allow you to add it with a specific message, 
+                             detailing your changes to the file.
+addpushall                :: Adds and pushes all of the files in the
+                             repository. Handy for pushing lots of changes 
+                             in one fell swoop!\n\n"""
+
+
 def process_args(opts, args):
     for o, a in opts:
         if o in ("-h", "--help"):
-            print __doc__
+            print(helpdoc)
             return
+    # We assume that the first argument describes the process to be done
     for arg in args:
         if arg == "help":
-            print __doc__
+            print(helpdoc)
             return
-        if arg == " ":
+        if arg == "exit" or arg == "goodbye" or arg == "quit":
+            print("Goodbye!")
+            sys.exit()
+    	if arg == "example":
+	    try:
+                send_to_daemon(args)
+            except OSError:
+                print("Uh oh, something went terribly wrong. Jumping ship!")
+                sys.exit()
+        else:
+            print("We didn't recognize \"" + arg + "\". Why don't you try typing \"help\" if you're having trouble?")
+
+def authenticate():
+    command = "/usr/bin/su " + getpass.getuser() + " -c \"exit\" 2>/dev/null"
+    print("Please enter your password -- we want to make sure you're you!\n")
+    for _ in range(3):
+        if os.system(command) == 0:
+            print("\nExistential crisis averted. All is well.\n")
             return
+        elif _ != 2:
+            print("Whoops, seems that you got your password wrong. Maybe you should try again.")
+    print("Stop right there, criminal scum! You have violated the law! Off to the dungeon with you!")
+    sys.exit()
+
 
 def send_to_daemon(message):
     call([DAEMONPATH] + message);
@@ -24,7 +70,11 @@ def send_to_daemon(message):
 def loop():
     print("Welcome to BEARS!\n")
     while True:
-        process_args([], str(input('[^-.-^] ')).split())
+        try:
+            process_args([], str(raw_input('[^-.-^] ')).split())
+        except KeyboardInterrupt:
+            print("\nGoodbye!")
+            sys.exit()
 
 def main():
     try:
@@ -36,7 +86,9 @@ def main():
     if len(args) == 0:
         loop()
     else:
-        process_arg(opt, args)
+        if args[0] != "help":
+            authenticate()
+        process_args(opts, args)
     
 if __name__ == "__main__":
     sys.exit(main())
