@@ -13,43 +13,7 @@
 pname="bearinit"
 daemonpath="/etc/bears/bearinitc"
 # This strips the program call from the arguments to form the message
-message=("${$[@]:1:${#$[@]}}")
+args=($@)
+message=("${args[@]:1:${#args[@]}}")
 
-case "$1" in
-'start')
-"$daemonpath" start
-;;
-
-'adduser')
-"$daemonpath" "${B[@]}"
-;;
-
-'retrieve')
-"$daemonpath" "${B[@]}"
-;;
-
-'add')
-"$daemonpath" "${B[@]}"
-;;
-
-'push')
-"$daemonpath" "${B[@]}"
-;;
-
-'addpush')
-"$daemonpath" "${B[@]}"
-;;
-
-'addpushall')
-"$daemonpath" "${B[@]}"
-;;
-
-'stop')
-pkill "$pname"
-;;
-
-'restart')
-pkill -HUP "$pname"
-;;
-
-esac
+"$daemonpath" "${message[@]}"
