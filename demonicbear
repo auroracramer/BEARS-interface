@@ -39,9 +39,27 @@ if __name__ == "__main__":
                         os.chdir(directory + '/..')
                         
                 elif 'adduser' == sys.argv[1]:
-                        
+			name_added = sys.argv[2]
+                        userpath = sys.argv[3]
+			for i in reversed(userpath.split):
+                        	if i in pending_users:
+					name=i
+				else:
+					return
+                        username = sys.argv[3]
+                        pending_users[name].append(name_added) 
                 elif 'retrieve' == sys.argv[1]:
-                        
+			userpath = sys.argv[3]
+                        name = sys.argv[2]
+                        username=sys.argv[4]
+			if username in pending_users[name]:
+				repo_users[name].append(username)
+				pending_users[name].remove(username)
+				os.chdir(userpath)
+				os.system("git clone "+repo_path+'/'+name)
+				os.chdir("/etc/bears")
+			else:
+				return
                 elif 'add' == sys.argv[1]:
                         if(sys.argv[2] == '-m'):
                             filename = sys.argv[3]
