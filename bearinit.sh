@@ -11,9 +11,9 @@
 ### END INIT INFO
 
 pname="bearinit"
-daemonpath="/etc/bears/bearinitc"
+daemonpath="/etc/bears/bearinit"
 # This strips the program call from the arguments to form the message
 args=($@)
-message=("${args[@]:1:${#args[@]}}")
+#message=("${args[@]:1:${#args[@]}}")
 
-"$daemonpath" "${message[@]}"
+"$daemonpath" "${args[@]}"

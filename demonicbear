@@ -68,7 +68,7 @@ if __name__ == "__main__":
                         os.remove(name + '_temp')
                         os.chdir(name)
                         # Add the repo upstream
-                        os.system('git remote add upstream ' repo_path + '/' + name)
+                        os.system('git remote add upstream ' + repo_path + '/' + name)
                         # Add and push the files to the repo 
                         os.system('git add -A')
                         os.system('git push -u origin master')
@@ -82,14 +82,14 @@ if __name__ == "__main__":
                         # Gets the folder name of the repository, working backwards
                         # in the folders of the path, since the user might be in a
                         # subfolder
+                        name = ''
                         for folder in reversed(userpath.split):
                                 if folder in pending_users:
                                         name = folder
-                                else:
-                                        return
                         # Appends the pending users name to the list of pending users
                         # of the repo
-                        pending_users[name].append(name_added) 
+                        if name != '':
+                            pending_users[name].append(name_added) 
 
                 elif 'retrieve' == sys.argv[1]:
                         userpath = sys.argv[3]
@@ -101,12 +101,13 @@ if __name__ == "__main__":
                                 repo_users[name].append(username)
                                 # Removes their name from the pending list
                                 pending_users[name].remove(username)
+
+                                # TO DO: ADD USER TO USER GROUP
+
                                 # Clones the repository in the users current directory
                                 os.chdir(userpath)
                                 os.system("git clone "+repo_path+'/'+name)
                                 os.chdir("/etc/bears")
-                        else:
-                                return
                 elif 'add' == sys.argv[1]:
                         # Get the filename, message, userpath, and username from the
                         # args. If there is no message, a default one is assumed.
