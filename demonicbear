@@ -25,18 +25,29 @@ if __name__ == "__main__":
                 elif 'restart' == sys.argv[1]:
                         daemon.restart()
                 elif 'share' == sys.argv[1]:
-                        directory = sys.argv[2]
                         userpath = sys.argv[3]
+                        directory = sys.argv[2]
                         name = directory.split('/')[len(directory.split('/')) - 1]
+                        if directory[0] != '/':
+                            directory = userpath + '/' + directory
                         username = sys.argv[4]
 
                         os.mkdir(repo_path + '/' + name)
 			# Lookup mode stuff for changing permissions
+                        os.chdir(userpath)
                         os.system('git clone --bare ' + name + ' ' + name + '.git')
                         # Make a new group, look up how to do that
                         repo_users[name] = list()
+                        pending_users[name] = list()
                         repo_users[name].append(username)
                         os.chdir(directory + '/..')
+                        os.rename(name, name + '_temp')
+                        os.system('git clone ' + repo_path + '/' + name)
+                        #COPY FILES FROM OLD FOLDER TO REPO FOLDER
+                        os.chdir(name)
+                        os.system('git remote add upstream ' repo_path + '/' + name) 
+                        os.system('git add -A')
+                        os.system('git push -u origin master')
                         
                 elif 'adduser' == sys.argv[1]:
                         
@@ -54,9 +65,10 @@ if __name__ == "__main__":
                             userpath = sys.argv[3]
                             username = sys.arg[4]
                         message = username + ": " + message
-
+                        os.chdir(userpath)
                         os.system('git add ' + filename)
                         os.system('git commit -m ' + '\'' + message + '\'')
+                        os.chdir('/etc/bears')
                         # Still need to chmod files
 			##### MAKE SURE ABSOLUTE PATHS ARE ACCOUNTED FOR!
                 elif 'push' == sys.argv[1]:
@@ -73,9 +85,11 @@ if __name__ == "__main__":
                             userpath = sys.argv[3]
 			    username=sys.argv[4]
                         message = getpass.getuser() + ": " + message
+                        os.chdir(userpath)
                         os.system('git add ' + filename)
                         os.system('git commit -m '+'\''+message+'\'')
 			os.system('git push -u origin master')
+                        os.chdir('/etc/bears')
 
                 elif 'addpushall' == sys.argv[1]:
 			if(sys.argv[2] == '-m'):
@@ -88,9 +102,11 @@ if __name__ == "__main__":
                             message = 'added changes '+filename
                             userpath = sys.argv[3]
                             username=sys.argv[4]
+                        os.chdir(userpath)
                         os.system('git add -A')
 			os.system('git commit -m '+'\''+message+'\'')
-			os.system('git push -u origin master')  
+			os.system('git push -u origin master')
+                        os.chdir('/etc/bears')
                 else:
                         print "Unknown command"
                         sys.exit(2)
