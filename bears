@@ -38,7 +38,9 @@ addpush -m <filename>     :: Adds and automatically pushes a file to the
                              detailing your changes to the file.
 addpushall                :: Adds and pushes all of the files in the
                              repository. Handy for pushing lots of changes
-                             in one fell swoop!\n\n"""
+                             in one fell swoop!
+pull                      :: Pulls any updated files. \n\n"""
+
 
 def process_args(opts, args, message):
     """ Process the arguments. Technically, this d`oesn't perform the actions
@@ -59,7 +61,7 @@ def process_args(opts, args, message):
     if arg in ["exit", "goodbye", "quit"]:
         print("Goodbye!")
         sys.exit()
-    if arg in ["share", "add", "push", "addpush", "addpushall", "adduser", "retrieve"]:
+    if arg in ["pull", "share", "add", "push", "addpush", "addpushall", "adduser", "retrieve"]:
         try:
             send_to_daemon(message)
         except OSError:
@@ -113,7 +115,7 @@ def main():
     else:
         if args[0] != "help":
             authenticate()
-        process_args(opts, args, argv[1:])
+        process_args(opts, args, sys.argv[1:])
 
 if __name__ == "__main__":
     sys.exit(main())
