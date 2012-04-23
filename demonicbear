@@ -3,10 +3,11 @@
 import sys, time, os, getpass, shutil, pickle
 from daemon import Daemon
 
-repo_users = dict()
-pending_users = dict()
+
 repo_path = "/etc/bears/repos"
 
+repo_users = dict()
+pending_users = dict()
 #Group names are the same as repository names 
 
 def load_dicts():
@@ -26,6 +27,7 @@ def load_dicts():
         else:
             pending_users = dict()
 
+
 def save_changes():
         global repo_users, pending_users
         os.chdir('/etc/bears/info/')
@@ -37,6 +39,7 @@ def save_changes():
         pu = open('pending_users', 'w+')
         pickle.dump(pending_users, pu)
         pu.close()
+
 
 class MyDaemon(Daemon):
         def run(self):
@@ -64,7 +67,6 @@ if __name__ == "__main__":
                         # directory path, extract it
                         name = directory.split('/')[len(directory.split('/')) - 1]
 
-                        
                         # If the directory path isn't absolute, make it absolute
                         if directory[0] != '/':
                             directory = userpath + '/' + directory
@@ -89,7 +91,7 @@ if __name__ == "__main__":
                         # Rename the folder to a temporary name
                         os.rename(name, name + '_temp')
                         # Clone the repository
-                        os.system('git clone ' + repo_path + '/' + name + '.git')
+                        os.system('git clone ' + repo_path + '/' + name + '/' + name + '.git')
                         os.chdir(name + '_temp')
                         # Move all of the files from the original folder into the
                         # repository folder
@@ -101,13 +103,15 @@ if __name__ == "__main__":
 
                         # Recursively change all of the file permissions to permit
                         # group
-                        os.system('chown -R :' + name + ' ' + name)
-                        os.system('chmod -R g=rw ' + name)
+                        os.system('chgrp -R ' + name + ' ' + name)
+                        os.system('chown -R ' + username + ':' + name + ' ' + name)
+                        os.system('chmod -R u+r,u+w,g+r,g+w ' + name)
 
                         # Give the repo directory itself group permission
 
-                        os.system('chown -R :' + name + ' ' + repo_path + '/' + name)
-                        os.system('chmod -R g=rw ' + repo_path + '/' + name)
+                        os.system('chgrp -R ' + name + ' ' + repo_path + '/' + name)
+                        os.system('chown -R ' + username + ':' + name + ' ' + repo_path + '/' + name)
+                        os.system('chmod -R u+r,u+w,g+r,g+w ' + repo_path + '/' + name)
 
                         os.chdir(name)
                         # Add the repo upstream
@@ -117,7 +121,7 @@ if __name__ == "__main__":
                         os.system('git commit -m \'' + username + ': initializing repository\'')
                         os.system('git push -u origin master')
                         os.chdir('/etc/bears')
-                        save_changes()                      
+                        save_changes()                        
                 elif 'adduser' == sys.argv[1]:
                         name_added = sys.argv[2]
                         userpath = sys.argv[3]
@@ -134,7 +138,7 @@ if __name__ == "__main__":
                         # of the repo
                         if name != '':
                             pending_users[name].append(name_added)
-                        save_changes()
+                        save_changes() 
                 elif 'retrieve' == sys.argv[1]:
                         userpath = sys.argv[3]
                         name = sys.argv[2]
@@ -168,13 +172,11 @@ if __name__ == "__main__":
                             message = 'added changes to ' + filename
                             userpath = sys.argv[3]
                             username = sys.argv[4]
-
                         # Message is preceded by the username, since all actions
                         # are done by root, and there needs to be a way to distinguish
                         # different users' changes
                         message = username + ": " + message
                         os.chdir(userpath)
-
 
                         # Find the repo based off the directory name, working 
                         # backwards in the folders of the path, since the user
@@ -185,8 +187,9 @@ if __name__ == "__main__":
                                         name = folder
                         # Adds group permission to the file
                         if name != '':
-                                os.system('chown -R :' + name + ' ' + filename)
-                                os.system('chmod -R g=rw ' + filename)
+                                os.system('chgrp -R ' + name + ' ' + filename)
+                                os.system('chown -R ' + username + ':' + name + ' ' + filename)
+                                os.system('chmod -R u+r,u+w,g+r,u+w ' + filename)
 
                         # Adds and commits the changes
                         os.system('git add ' + filename)
@@ -225,9 +228,9 @@ if __name__ == "__main__":
                                         name = folder
                         # Adds group permission to the file
                         if name != '':
-                                os.system('chown -R :' +  + ' ' + filename)
-                                os.system('chmod -R g=rw ' + filename)
-
+                                os.system('chgrp -R ' + name + ' ' + filename)
+                                os.system('chown -R ' + username + ':' + name + ' ' + filename)
+                                os.system('chmod -R u+r,u+w,g+r,g+w ' + filename)
 
                         # Add and push files
                         os.system('git add ' + filename)
@@ -245,17 +248,18 @@ if __name__ == "__main__":
                         else:
                             message = 'added changes to everything'
                             userpath = sys.argv[2]
-                            username=sys.argv[4]
+                            username=sys.argv[3]
                         os.chdir(userpath)
+
 
                         name = ''
                         while(os.path.abspath('.').split('/')[len(os.path.abspath('.').split('/')) - 1] not in repo_users):
                             os.chdir('..')
                             name = os.path.abspath('.').split('/')[len(os.path.abspath('.').split('/')) - 1]
                         if name != '':
-                            os.system('chown -R : ' + name + ' ' + name)
-                            os.system('chmod -R g=rw ' + name)
-                        
+                            os.system('chgrp -R ' + name + ' ' + name)
+                            os.system('chown -R ' + username + ':' + name + ' ' + name)
+                            os.system('chmod -R u+r,u+w,g+r,g+w ' + name)
 
                         # Add and push all files
                         os.system('git add -A')
@@ -263,7 +267,7 @@ if __name__ == "__main__":
                         os.system('git push -u origin master')
                         os.chdir('/etc/bears')
                         save_changes()
-                elif 'push' == sys.argv[1]:
+                elif 'pull' == sys.argv[1]:
                         userpath = sys.argv[2]
                         username = sys.argv[3]
                         # Go to the directory and push                    
@@ -278,6 +282,4 @@ if __name__ == "__main__":
         else:
                 print "usage: %s start|stop|restart" % sys.argv[0]
                 sys.exit(2)
-
-
 
