@@ -4,11 +4,12 @@ import sys, time, os, getpass, shutil
 from daemon import Daemon
 
 
-repo_path = "/etc/bears/repo"
+repo_path = "/etc/bears/repos"
 
 repo_users = dict()
 pending_users = dict()
 #Group names are the same as repository names 
+
 
 class MyDaemon(Daemon):
         def run(self):
@@ -16,8 +17,8 @@ class MyDaemon(Daemon):
                         time.sleep(1)
 
 if __name__ == "__main__":
-        daemon = MyDaemon('/tmp/daemon-example.pid')
-        if len(sys.argv) == 2:
+        daemon = MyDaemon('/tmp/bears.pid')
+        if len(sys.argv) >= 2:
                 if 'start' == sys.argv[1]:
                         daemon.start()
                 elif 'stop' == sys.argv[1]:
@@ -25,6 +26,8 @@ if __name__ == "__main__":
                 elif 'restart' == sys.argv[1]:
                         daemon.restart()
                 elif 'share' == sys.argv[1]:
+                        # Get root access
+                        get_access()
                         # Extract the userpath, directory, and username from the args
                         userpath = sys.argv[3]
                         directory = sys.argv[2]
@@ -57,7 +60,7 @@ if __name__ == "__main__":
                         # Rename the folder to a temporary name
                         os.rename(name, name + '_temp')
                         # Clone the repository
-                        os.system('git clone ' + repo_path + '/' + name)
+                        os.system('git clone ' + repo_path + '/' + name + '.git')
                         os.chdir(name + '_temp')
                         # Move all of the files from the original folder into the
                         # repository folder
@@ -65,16 +68,18 @@ if __name__ == "__main__":
                             shutil.move(f, '../' + name)
                         os.chdir('..')
                         # Delete the old folder, which should now be empty
-                        os.remove(name + '_temp')
+                        os.removedirs(name + '_temp')
                         os.chdir(name)
                         # Add the repo upstream
-                        os.system('git remote add upstream ' + repo_path + '/' + name)
+                        os.system('git remote add upstream ' + repo_path + '/' + name + '/' + name + '.git')
                         # Add and push the files to the repo 
                         os.system('git add -A')
+                        os.system('git commit -m \'' + username + ': initializing repository\'')
                         os.system('git push -u origin master')
                         os.chdir('/etc/bears')                        
-
+                        logout()
                 elif 'adduser' == sys.argv[1]:
+                        get_access()
                         name_added = sys.argv[2]
                         userpath = sys.argv[3]
                         username = sys.argv[4]
@@ -90,8 +95,9 @@ if __name__ == "__main__":
                         # of the repo
                         if name != '':
                             pending_users[name].append(name_added) 
-
+                        logout()
                 elif 'retrieve' == sys.argv[1]:
+                        get_access()
                         userpath = sys.argv[3]
                         name = sys.argv[2]
                         username=sys.argv[4]
@@ -108,7 +114,9 @@ if __name__ == "__main__":
                                 os.chdir(userpath)
                                 os.system("git clone "+repo_path+'/'+name)
                                 os.chdir("/etc/bears")
+                        logout()
                 elif 'add' == sys.argv[1]:
+                        get_access()
                         # Get the filename, message, userpath, and username from the
                         # args. If there is no message, a default one is assumed.
                         if(sys.argv[2] == '-m'):
@@ -120,7 +128,7 @@ if __name__ == "__main__":
                             filename = sys.argv[2]
                             message = 'added changes to ' + filename
                             userpath = sys.argv[3]
-                            username = sys.arg[4]
+                            username = sys.argv[4]
                         # Message is preceded by the username, since all actions
                         # are done by root, and there needs to be a way to distinguish
                         # different users' changes
@@ -133,14 +141,18 @@ if __name__ == "__main__":
                         os.system('git add ' + filename)
                         os.system('git commit -m ' + '\'' + message + '\'')
                         os.chdir('/etc/bears')
+                        logout()
                 elif 'push' == sys.argv[1]:
+                        get_access()
                         userpath = sys.argv[2]
                         username = sys.argv[3]
                         # Go to the directory and push                    
                         os.chdir(userpath)
                         os.system('git push -u origin master')
                         os.chdir('/etc/bears')
+                        logout()
                 elif 'addpush' == sys.argv[1]:
+                        get_access()
                         # Get the filename, message, userpath, and username from the
                         # args. If there is no message, a default one is assumed.
                         if(sys.argv[2] == '-m'):
@@ -163,19 +175,18 @@ if __name__ == "__main__":
                         os.system('git commit -m '+'\''+message+'\'')
                         os.system('git push -u origin master')
                         os.chdir('/etc/bears')
-
+                        logout()
                 elif 'addpushall' == sys.argv[1]:
+                        get_access()
                         # Get the filename, message, userpath, and username from the
                         # args. If there is no message, a default one is assumed.
                         if(sys.argv[2] == '-m'):
-                            filename = sys.argv[3]
-                            message = sys.argv[4]
-                            userpath = sys.argv[5]
-                            username=sys.argv[6]
+                            message = sys.argv[3]
+                            userpath = sys.argv[4]
+                            username=sys.argv[5]
                         else:
-                            filename = sys.argv[2]
-                            message = 'added changes '+filename
-                            userpath = sys.argv[3]
+                            message = 'added changes to everything'
+                            userpath = sys.argv[2]
                             username=sys.argv[4]
                         os.chdir(userpath)
 
@@ -186,6 +197,7 @@ if __name__ == "__main__":
                         os.system('git commit -m '+'\''+message+'\'')
                         os.system('git push -u origin master')
                         os.chdir('/etc/bears')
+                        logout()
                 else:
                         print "Unknown command"
                         sys.exit(2)
@@ -193,4 +205,5 @@ if __name__ == "__main__":
         else:
                 print "usage: %s start|stop|restart" % sys.argv[0]
                 sys.exit(2)
+
 
