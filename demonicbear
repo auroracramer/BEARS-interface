@@ -127,7 +127,7 @@ if __name__ == "__main__":
                         # in the folders of the path, since the user might be in a
                         # subfolder
                         name = ''
-                        for folder in reversed(userpath.split()):
+                        for folder in reversed(userpath.split('/')):
                                 if folder in pending_users:
                                         name = folder
                         # Appends the pending users name to the list of pending users
@@ -150,7 +150,7 @@ if __name__ == "__main__":
 
                                 # Clones the repository in the users current directory
                                 os.chdir(userpath)
-                                os.system("git clone "+repo_path+'/'+name)
+                                os.system("git clone "+repo_path+'/'+name + '/' + name + '.git')
                                 os.chdir(name)
                                 os.system('git remote add upstream ' + repo_path + '/' + name + '/' + name + '.git')
                                 os.chdir("/etc/bears")
@@ -180,7 +180,7 @@ if __name__ == "__main__":
                         # backwards in the folders of the path, since the user
                         # might be in a subfolder
                         name = ''
-                        for folder in reversed(userpath.split()):
+                        for folder in reversed(userpath.split('/')):
                                 if folder in pending_users:
                                         name = folder
                         # Adds group permission to the file
@@ -220,7 +220,7 @@ if __name__ == "__main__":
                         # backwards in the folders of the path, since the user
                         # might be in a subfolder
                         name = ''
-                        for folder in reversed(userpath.split()):
+                        for folder in reversed(userpath.split('/')):
                                 if folder in pending_users:
                                         name = folder
                         # Adds group permission to the file
@@ -249,9 +249,9 @@ if __name__ == "__main__":
                         os.chdir(userpath)
 
                         name = ''
-                        while(os.path.abspath('.').split()[len(os.path.abspath('.').split()) - 1] not in repo_users):
+                        while(os.path.abspath('.').split('/')[len(os.path.abspath('.').split('/')) - 1] not in repo_users):
                             os.chdir('..')
-                            name = os.path.abspath('.').split()[len(os.path.abspath('.').split()) - 1]
+                            name = os.path.abspath('.').split('/')[len(os.path.abspath('.').split('/')) - 1]
                         if name != '':
                             os.system('chown -R : ' + name + ' ' + name)
                             os.system('chmod -R g=rw ' + name)
