@@ -155,6 +155,9 @@ if __name__ == "__main__":
                                 # Clones the repository in the users current directory
                                 os.chdir(userpath)
                                 os.system("git clone "+repo_path+'/'+name + '/' + name + '.git')
+                                os.system('chgrp -R ' + name + ' ' + name)
+                                os.system('chown -R ' + username + ':' + name + ' ' + name)
+                                os.system('chmod -R u+r,u+w,g+r,g+w ' + name)
                                 os.chdir(name)
                                 os.system('git remote add upstream ' + repo_path + '/' + name + '/' + name + '.git')
                                 os.chdir("/etc/bears")
@@ -256,6 +259,9 @@ if __name__ == "__main__":
                         while(os.path.abspath('.').split('/')[len(os.path.abspath('.').split('/')) - 1] not in repo_users):
                             os.chdir('..')
                             name = os.path.abspath('.').split('/')[len(os.path.abspath('.').split('/')) - 1]
+                        if(os.path.abspath('.').split('/')[len(os.path.abspath('.').split('/')) - 1] in repo_users):
+                            name = os.path.abspath('.').split('/')[len(os.path.abspath('.').split('/')) - 1]
+                            os.chdir('..')
                         if name != '':
                             os.system('chgrp -R ' + name + ' ' + name)
                             os.system('chown -R ' + username + ':' + name + ' ' + name)
@@ -273,6 +279,17 @@ if __name__ == "__main__":
                         # Go to the directory and push                    
                         os.chdir(userpath)
                         os.system('git pull -u origin master')
+                        name = ''
+                        while(os.path.abspath('.').split('/')[len(os.path.abspath('.').split('/')) - 1] not in repo_users):
+                            os.chdir('..')
+                            name = os.path.abspath('.').split('/')[len(os.path.abspath('.').split('/')) - 1]
+                        if(os.path.abspath('.').split('/')[len(os.path.abspath('.').split('/')) - 1] in repo_users):
+                            name = os.path.abspath('.').split('/')[len(os.path.abspath('.').split('/')) - 1]
+                            os.chdir('..')
+                        if name != '':
+                            os.system('chgrp -R ' + name + ' ' + name)
+                            os.system('chown -R ' + username + ':' + name + ' ' + name)
+                            os.system('chmod -R u+r,u+w,g+r,g+w ' + name)
                         os.chdir('/etc/bears')
                         save_changes()
                 else:
